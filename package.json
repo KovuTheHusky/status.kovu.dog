@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "PHP-Minecraft-Query": "https://github.com/xPaw/PHP-Minecraft-Query",
+    "PHP-Source-Query": "https://github.com/xPaw/PHP-Source-Query"
+  }
+}
