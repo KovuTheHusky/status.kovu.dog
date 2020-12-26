@@ -48,8 +48,12 @@ while (true) {
         $rcon->SetRconPassword(MINECRAFT_PASSWORD);
         while (true) {
             for ($time = time(); $time == time(); usleep(1000));
-            array_shift($json->Tickrate);
-            array_shift($json->Memory);
+            if (count($json->Tickrate) > 60) {
+                array_shift($json->Tickrate);
+            }
+            if (count($json->Memory) > 60) {
+                array_shift($json->Memory);
+            }
             $query->Connect(MINECRAFT_IP, 25565, 1);
             $json->Info = $query->GetInfo();
             $players = $query->GetPlayers();
