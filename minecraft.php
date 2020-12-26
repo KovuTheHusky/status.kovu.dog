@@ -68,7 +68,6 @@ while (true) {
                 } else {
                     $weather = 'rain';
                 }
-                
             } else {
                 $weather = 'clear';
             }
