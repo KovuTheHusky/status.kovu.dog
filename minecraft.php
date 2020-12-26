@@ -54,13 +54,21 @@ while (true) {
             $json->Info = $query->GetInfo();
             $players = $query->GetPlayers();
             $json->Players = $players ? $players : array();
-            $json->Day = explode(' ', $rcon->Rcon('time query day'))[3];
-            $json->Time = explode(' ', $rcon->Rcon('time query daytime'))[3];
+            $day = explode(' ', $rcon->Rcon('time query day'))[3] + 1;
+            $time = explode(' ', $rcon->Rcon('time query daytime'))[3];
+            if ($time >= 18000) {
+                ++$day;
+            }
+            $json->Day = $day;
+            $json->Time = $time;
             $weather = json_decode(file_get_contents('https://minecraft.kovuthehusky.com/standalone/update.php?world=world'));
-            if ($weather->isThundering) {
-                $weather = 'thunder';
-            } else if ($weather->hasStorm) {
-                $weather = 'rain';
+            if ($weather->hasStorm) {
+                if ($weather->isThundering) {
+                    $weather = 'thunder';
+                } else {
+                    $weather = 'rain';
+                }
+                
             } else {
                 $weather = 'clear';
             }
