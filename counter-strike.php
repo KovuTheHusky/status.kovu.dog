@@ -36,17 +36,26 @@ if (file_exists('counter-strike.json') && filesize('counter-strike.json') > 0) {
 while (true) {
     for ($time = time(); $time == time(); usleep(1000));
     $query = new SourceQuery();
-    try {
-        $query->Connect(COUNTERSTRIKE_IP, 27015);
-        while (true) {
-            for ($time = time(); $time == time(); usleep(1000));
+    $query->Connect(COUNTERSTRIKE_IP, 27015);
+    $error = false;
+    while (!$error) {
+        for ($time = time(); $time == time(); usleep(1000));
+        try {
             $json->Info = $query->GetInfo();
-            $players = $query->GetPlayers();
+        } catch (Exception $e) {
+            $error = true;
+            file_put_contents('counter-strike.json', '', LOCK_EX);
+            file_put_contents('counter-strike.log', '[' . date('d-M-y H:i:s T') . '] ' . $e . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+        if (!$error) {
+            $players = false;
+            try {
+                $players = $query->GetPlayers();
+            } catch (Exception $e) {
+                $players = false;
+            }
             $json->Players = $players ? $players : array();
             file_put_contents('counter-strike.json', json_encode($json), LOCK_EX);
         }
-    } catch (Exception $e) {
-        file_put_contents('counter-strike.json', '', LOCK_EX);
-        file_put_contents('counter-strike.log', '[' . date('d-M-y H:i:s T') . '] ' . $e . PHP_EOL, FILE_APPEND | LOCK_EX);
     }
 }
