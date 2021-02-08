@@ -36,26 +36,35 @@ if (file_exists('counter-strike.json') && filesize('counter-strike.json') > 0) {
 while (true) {
     for ($time = time(); $time == time(); usleep(1000));
     $query = new SourceQuery();
-    $query->Connect(COUNTERSTRIKE_IP, 27015);
-    $error = false;
-    while (!$error) {
-        for ($time = time(); $time == time(); usleep(1000));
-        try {
+    try {
+        $query->Connect(COUNTERSTRIKE_IP, 27015);
+        $query->SetRconPassword(COUNTERSTRIKE_PASSWORD);
+        while (true) {
+            for ($time = time(); $time == time(); usleep(1000));
             $json->Info = $query->GetInfo();
-        } catch (Exception $e) {
-            $error = true;
-            file_put_contents('counter-strike.json', '', LOCK_EX);
-            file_put_contents('counter-strike.log', '[' . date('d-M-y H:i:s T') . '] ' . $e . PHP_EOL, FILE_APPEND | LOCK_EX);
-        }
-        if (!$error) {
-            $players = false;
-            try {
-                $players = $query->GetPlayers();
-            } catch (Exception $e) {
-                $players = false;
+            $status = $query->Rcon('status');
+            preg_match_all('/"(.*)" STEAM_1:([0-9]+):([0-9]+)/i', $status, $players, PREG_SET_ORDER);
+            $arr = array();
+            foreach ($players as $player) {
+                $id = (($player[3] * 2) + $player[2]) + 76561197960265728;
+                $name = $player[1];
+
+                $req = json_decode(file_get_contents('https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=' . COUNTERSTRIKE_SECRET . '&steamids=' . $id));
+
+                $avatar = $req->response->players[0]->avatarfull;
+
+                $arr[] = array(
+                    'id' => $id,
+                    'name' => $name,
+                    'avatar' => $avatar
+                );
             }
-            $json->Players = $players ? $players : array();
+            //preg_match_all('/"(.*)" BOT/i', $status, $bots, PREG_SET_ORDER);
+            $json->Players = $arr;
             file_put_contents('counter-strike.json', json_encode($json), LOCK_EX);
         }
+    } catch (Exception $e) {
+        file_put_contents('counter-strike.json', '', LOCK_EX);
+        file_put_contents('counter-strike.log', '[' . date('d-M-y H:i:s T') . '] ' . $e . PHP_EOL, FILE_APPEND | LOCK_EX);
     }
 }
