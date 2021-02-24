@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@ghuser/github-contribs": "^2.2.4",
     "PHP-Minecraft-Query": "https://github.com/xPaw/PHP-Minecraft-Query",
     "PHP-Source-Query": "https://github.com/xPaw/PHP-Source-Query"
   }
