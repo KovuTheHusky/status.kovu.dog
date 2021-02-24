@@ -124,15 +124,15 @@ foreach ($json->contributions as $repo) {
             $slug = preg_replace('/[^[a-z0-9]/', '', strtolower($name));
 
             if (get_headers("https://kovuthehusky.com/images/projects/icons/{$slug}.svg")[0] == 'HTTP/1.1 200 OK') {
-                $project->icon = "images/projects/icons/{$slug}.svg";
+                $project->icon = "/images/projects/icons/{$slug}.svg";
             } else if (get_headers("https://kovuthehusky.com/images/projects/icons/{$slug}.webp")[0] == 'HTTP/1.1 200 OK') {
-                $project->icon = "images/projects/icons/{$slug}.webp";
+                $project->icon = "/images/projects/icons/{$slug}.webp";
             }
 
             if (get_headers("https://kovuthehusky.com/videos/projects/previews/{$slug}.mp4")[0] == 'HTTP/1.1 200 OK') {
-                $project->preview_video = "videos/projects/previews/{$slug}.mp4";
+                $project->preview_video = "/videos/projects/previews/{$slug}.mp4";
             } else if (get_headers("https://kovuthehusky.com/images/projects/previews/{$slug}.webp")[0] == 'HTTP/1.1 200 OK') {
-                $project->preview_image = "images/projects/previews/{$slug}.webp";
+                $project->preview_image = "/images/projects/previews/{$slug}.webp";
             }
 
             $line = explode("\r\n", file_get_contents("https://raw.githubusercontent.com/{$repo}/master/README.md"))[0];
