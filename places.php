@@ -68,10 +68,10 @@ do {
         if ($item->venue->location->lat > $maxlat) {
             $maxlat = $item->venue->location->lat;
         }
-        if ($item->venue->location->lng > $minlng) {
+        if ($item->venue->location->lng < $minlng) {
             $minlng = $item->venue->location->lng;
         }
-        if ($item->venue->location->lat > $minlat) {
+        if ($item->venue->location->lat < $minlat) {
             $minlat = $item->venue->location->lat;
         }
     }
