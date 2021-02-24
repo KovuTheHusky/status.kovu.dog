@@ -165,4 +165,4 @@ foreach ($json->contributions as $repo) {
 $json->since = $today;
 $json->contributions = array_values($json->contributions);
 
-file_put_contents('projects.json', json_encode($json));
+file_put_contents('projects.json', json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
