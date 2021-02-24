@@ -89,7 +89,7 @@ foreach ($json->contributions as $repo) {
         if ($owner == 'KovuTheHusky' || in_array($owner, $orgs)) {
             $homepage = $response->homepage;
             $homepage_text = 'Visit';
-            if (!$homepage || str_starts_with($homepage, 'https://kovuthehusky.com/projects')) {
+            if (!$homepage || strpos($homepage, 'https://kovuthehusky.com/projects') === 0) {
                 $homepage = null;
                 $homepage_text = null;
             }
