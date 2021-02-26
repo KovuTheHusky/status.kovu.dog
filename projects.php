@@ -136,9 +136,11 @@ foreach ($json->contributions as $repo) {
             }
 
             $line = explode("\n", file_get_contents("https://raw.githubusercontent.com/{$repo}/master/README.md"))[0];
-            $match = preg_match('/^#?\s*([^\[]+).*$/', $line, $matches);
-            if ($match) {
-                $project->name = trim($matches[1]);
+            if ($repo != 'KovuTheHusky/KovuTheHusky') {
+                $match = preg_match('/^#?\s*([^\[]+).*$/', $line, $matches);
+                if ($match) {
+                    $project->name = trim($matches[1]);
+                }
             }
             $match = preg_match('/http[s]?:\/\/.*repostatus\.org\/badges\/.+?\/(.+?)\.svg/', $line, $matches);
             if ($match) {
