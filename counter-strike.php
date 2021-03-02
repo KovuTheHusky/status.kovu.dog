@@ -42,6 +42,23 @@ while (true) {
         while (true) {
             for ($time = time(); $time == time(); usleep(1000));
             $json->Info = $query->GetInfo();
+            $map = $json->Info['Map'];
+            if (strpos($map, 'workshop/') === 0) {
+                preg_match('/^workshop\/([0-9]+)\/.+$/', $map, $matches);
+                $wsid = $matches[1];
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL,"https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/");
+                curl_setopt($ch, CURLOPT_POST, 1);
+                curl_setopt($ch, CURLOPT_POSTFIELDS,
+                '?key=' . COUNTERSTRIKE_SECRET . '&itemcount=1&publishedfileids%5B0%5D=' . $wsid);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $server_output = curl_exec($ch);
+                curl_close ($ch);
+                $ws = json_decode($server_output);
+                $json->Info['MapImage'] = $ws->response->publishedfiledetails[0]->preview_url;
+            } else {
+                $json->Info['MapImage'] = 'https://raw.githubusercontent.com/SteamDatabase/GameTracking-CSGO/master/csgo/maps/' . $map . '.jpg';
+            }
             $status = $query->Rcon('status');
             preg_match_all('/STEAM_1:([0-9]+):([0-9]+)/i', $status, $players, PREG_SET_ORDER);
             $arr = array();
@@ -54,8 +71,7 @@ while (true) {
                 $name = $req->response->players[0]->personaname;
                 $url = $req->response->players[0]->profileurl;
 
-                $arr[] = array(
-                    'id' => $id,
+                $arr[$id] = array(
                     'name' => $name,
                     'avatar' => $avatar,
                     'url' => $url
