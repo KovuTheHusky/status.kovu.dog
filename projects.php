@@ -123,15 +123,15 @@ foreach ($json->contributions as $repo) {
 
             $slug = preg_replace('/[^[a-z0-9]/', '', strtolower($name));
 
-            if (get_headers("https://kovuthehusky.com/images/projects/icons/{$slug}.svg")[0] == 'HTTP/1.1 200 OK') {
+            if (get_headers("https://raw.githubusercontent.com/KovuTheHusky/kovuthehusky.com/master/images/projects/icons/{$slug}.svg")[0] == 'HTTP/1.1 200 OK') {
                 $project->icon = "/images/projects/icons/{$slug}.svg";
-            } else if (get_headers("https://kovuthehusky.com/images/projects/icons/{$slug}.webp")[0] == 'HTTP/1.1 200 OK') {
+            } else if (get_headers("https://raw.githubusercontent.com/KovuTheHusky/kovuthehusky.com/master/images/projects/icons/{$slug}.webp")[0] == 'HTTP/1.1 200 OK') {
                 $project->icon = "/images/projects/icons/{$slug}.webp";
             }
 
-            if (get_headers("https://kovuthehusky.com/videos/projects/previews/{$slug}.mp4")[0] == 'HTTP/1.1 200 OK') {
+            if (get_headers("https://raw.githubusercontent.com/KovuTheHusky/kovuthehusky.com/master/videos/projects/previews/{$slug}.mp4")[0] == 'HTTP/1.1 200 OK') {
                 $project->preview_video = "/videos/projects/previews/{$slug}.mp4";
-            } else if (get_headers("https://kovuthehusky.com/images/projects/previews/{$slug}.webp")[0] == 'HTTP/1.1 200 OK') {
+            } else if (get_headers("https://raw.githubusercontent.com/KovuTheHusky/kovuthehusky.com/master/images/projects/previews/{$slug}.webp")[0] == 'HTTP/1.1 200 OK') {
                 $project->preview_image = "/images/projects/previews/{$slug}.webp";
             }
 
