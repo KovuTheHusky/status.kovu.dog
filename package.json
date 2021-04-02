@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@ghuser/github-contribs": "^2.2.4",
-    "@popperjs/core": "^2.9.1",
+    "@popperjs/core": "^2.9.2",
     "PHP-Minecraft-Query": "https://github.com/xPaw/PHP-Minecraft-Query",
     "PHP-Source-Query": "https://github.com/xPaw/PHP-Source-Query",
     "bootstrap": "^5.0.0-beta3",
