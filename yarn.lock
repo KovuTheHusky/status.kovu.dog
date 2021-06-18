@@ -21,7 +21,8 @@
 
 "PHP-Minecraft-Query@https://github.com/xPaw/PHP-Minecraft-Query":
   version "0.0.0"
-  resolved "https://github.com/xPaw/PHP-Minecraft-Query#d3d04e0ba93ab82c7261b87676f55afe743600a5"
+  uid c7257e7c3d18c14cd476910f1516f93f405f54ee
+  resolved "https://github.com/xPaw/PHP-Minecraft-Query#c7257e7c3d18c14cd476910f1516f93f405f54ee"
 
 "PHP-Source-Query@https://github.com/xPaw/PHP-Source-Query":
   version "0.0.0"
