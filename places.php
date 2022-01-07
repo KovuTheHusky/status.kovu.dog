@@ -47,6 +47,9 @@ do {
             continue;
         }
         $unique[] = $item->venue->id;
+        if (!isset($item->venue->location->formattedAddress)) {
+            $item->venue->location->formattedAddress = '';
+        }
         $geojson['features'][] = array(
             'type' => 'Feature',
             'geometry' => array(
