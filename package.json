@@ -5,7 +5,7 @@
     "PHP-Minecraft-Query": "https://github.com/xPaw/PHP-Minecraft-Query",
     "PHP-Source-Query": "https://github.com/xPaw/PHP-Source-Query",
     "bootstrap": "^5.2.3",
-    "bootstrap-icons": "^1.10.2",
+    "bootstrap-icons": "^1.10.3",
     "chart.js": "^4.1.1",
     "clipboard": "^2.0.11",
     "jquery": "^3.6.3",
