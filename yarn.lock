@@ -30,7 +30,8 @@
 
 "PHP-Source-Query@https://github.com/xPaw/PHP-Source-Query":
   version "0.0.0"
-  resolved "https://github.com/xPaw/PHP-Source-Query#f38c42be4ba44faeeedb4cf3bdc0e765bff1e453"
+  uid ce9c8f423e4b8a7c867160d91c2b058350d74940
+  resolved "https://github.com/xPaw/PHP-Source-Query#ce9c8f423e4b8a7c867160d91c2b058350d74940"
 
 ansi-regex@^3.0.0:
   version "3.0.1"
