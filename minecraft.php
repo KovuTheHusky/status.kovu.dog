@@ -65,7 +65,7 @@ while (true) {
             }
             $json->Day = $day;
             $json->Time = $time;
-            $weather = json_decode(file_get_contents('https://minecraft.kovuthehusky.com/standalone/update.php?world=world'));
+            $weather = json_decode(file_get_contents('https://minecraft.kovu.dog/standalone/MySQL_update.php?world=world'));
             if ($weather->hasStorm) {
                 if ($weather->isThundering) {
                     $weather = 'thunder';
