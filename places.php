@@ -11,6 +11,40 @@ ini_set('error_log', 'places.log');
 
 require __DIR__ . '/configuration.php';
 
+/**
+ * Renders a progress bar in the command line.
+ *
+ * @param int $done The number of items completed.
+ * @param int $total The total number of items.
+ * @param int $width The width of the progress bar in characters.
+ */
+function progressBar($done, $total, $width = 50) {
+    if ($total == 0) {
+        return; // Avoid division by zero
+    }
+
+    $percentage = ($done / $total);
+    $bar = floor($percentage * $width);
+
+    // Build the progress bar string
+    $statusBar = "\r[";
+    $statusBar .= str_repeat("=", $bar);
+    if ($bar < $width) {
+        $statusBar .= ">";
+        $statusBar .= str_repeat(" ", $width - $bar - 1);
+    } else {
+        $statusBar .= "=";
+    }
+
+    $disp = number_format($percentage * 100, 0);
+
+    $statusBar .= "] $disp% ($done/$total)";
+
+    echo $statusBar;
+    flush();
+}
+
+
 $maxlng = -180;
 $maxlat = -90;
 $minlng = 180;
@@ -26,29 +60,43 @@ $unique = array();
 $sequentialErrors = 0;
 $totalErrors = 0;
 $uniqueIcons = array();
+$totalCheckins = 0;
 
 $loop = 0;
+echo "Fetching check-in data..." . PHP_EOL;
+
 do {
 
     $res = json_decode(file_get_contents('https://api.foursquare.com/v2/users/self/checkins?oauth_token=' . FOURSQUARE_SECRET . '&v=20200303&limit=250&offset=' . $offset));
-    // echo PHP_EOL . 'Fetched ' . ($offset + count($res->response->checkins->items)) . ' checkins on loop ' . $loop . PHP_EOL;
-    echo $res->response->checkins->count . ' total checkins, fetched ' . ($offset + count($res->response->checkins->items)) . ' on loop ' . $loop . PHP_EOL;
-    file_put_contents('places-' . ++$loop . '.json', json_encode($res));
+
+    if ($loop === 0 && isset($res->response->checkins->count)) {
+        $totalCheckins = $res->response->checkins->count;
+    }
+
+    if (isset($res->response->checkins->items)) {
+        $currentFetched = min($offset + count($res->response->checkins->items), $totalCheckins);
+        progressBar($currentFetched, $totalCheckins);
+    }
 
     if ($res->meta->code != 200) {
         ++$sequentialErrors;
         ++$totalErrors;
         if ($sequentialErrors < 10 && $totalErrors < 100) {
+            sleep(1);
             continue;
         } else {
+            echo PHP_EOL . "Exiting due to too many consecutive errors." . PHP_EOL;
             exit;
         }
     } else {
         $sequentialErrors = 0;
     }
 
+    if (!isset($res->response->checkins->items)) {
+        break;
+    }
+
     foreach ($res->response->checkins->items as $item) {
-        // echo $item->venue->name . ' (' . $item->venue->id . '), ';
         if (in_array($item->venue->id, $unique)) {
             continue;
         }
@@ -61,7 +109,7 @@ do {
         } else {
             $icon = 'default';
         }
-        if (count($item->venue->categories) > 0 && !in_array($item->venue->categories[0]->icon, $uniqueIcons)) {
+        if (count($item->venue->categories) > 0 && !in_array($item->venue->categories[0]->icon, $uniqueIcons) && !file_exists('places/' . $icon . '.png')) {
             file_put_contents('places/' . $icon . '.png', file_get_contents($item->venue->categories[0]->icon->prefix . '512' . $item->venue->categories[0]->icon->suffix));
             $uniqueIcons[] = $item->venue->categories[0]->icon;
         }
@@ -99,8 +147,12 @@ do {
     }
 
     $offset += 250;
+    $loop++;
 
 } while (count($res->response->checkins->items) > 0);
+
+echo PHP_EOL; // Add a newline after the progress bar is complete
+echo "Processing complete. Saving files..." . PHP_EOL;
 
 $bounds = array(
     array(
