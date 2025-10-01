@@ -25,10 +25,15 @@ $offset = 0;
 $unique = array();
 $sequentialErrors = 0;
 $totalErrors = 0;
+$uniqueIcons = array();
 
+$loop = 0;
 do {
 
     $res = json_decode(file_get_contents('https://api.foursquare.com/v2/users/self/checkins?oauth_token=' . FOURSQUARE_SECRET . '&v=20200303&limit=250&offset=' . $offset));
+    // echo PHP_EOL . 'Fetched ' . ($offset + count($res->response->checkins->items)) . ' checkins on loop ' . $loop . PHP_EOL;
+    echo $res->response->checkins->count . ' total checkins, fetched ' . ($offset + count($res->response->checkins->items)) . ' on loop ' . $loop . PHP_EOL;
+    file_put_contents('places-' . ++$loop . '.json', json_encode($res));
 
     if ($res->meta->code != 200) {
         ++$sequentialErrors;
@@ -43,10 +48,23 @@ do {
     }
 
     foreach ($res->response->checkins->items as $item) {
+        // echo $item->venue->name . ' (' . $item->venue->id . '), ';
         if (in_array($item->venue->id, $unique)) {
             continue;
         }
         $unique[] = $item->venue->id;
+        if (isset($item->venue->categories[0]->icon)) {
+            $icon = str_replace('https://ss3.4sqi.net/img/categories_v2/', '', $item->venue->categories[0]->icon->prefix);
+            $icon = str_replace('/', '-', $icon);
+            $icon = rtrim($icon, '-');
+            $icon = rtrim($icon, '_');
+        } else {
+            $icon = 'default';
+        }
+        if (count($item->venue->categories) > 0 && !in_array($item->venue->categories[0]->icon, $uniqueIcons)) {
+            file_put_contents('places/' . $icon . '.png', file_get_contents($item->venue->categories[0]->icon->prefix . '512' . $item->venue->categories[0]->icon->suffix));
+            $uniqueIcons[] = $item->venue->categories[0]->icon;
+        }
         if (!isset($item->venue->location->formattedAddress)) {
             $item->venue->location->formattedAddress = '';
         }
@@ -62,6 +80,7 @@ do {
             'properties' => array(
                 'id' => $item->venue->id,
                 'name' => $item->venue->name,
+                'icon' => $icon,
                 'address' => $item->venue->location->formattedAddress
             )
         );
@@ -94,4 +113,5 @@ $bounds = array(
 );
 
 file_put_contents('places.geojson', json_encode($geojson));
+file_put_contents('places-icons.json', json_encode($uniqueIcons));
 file_put_contents('places.js', 'var bounds = ' . json_encode($bounds) . ';');
