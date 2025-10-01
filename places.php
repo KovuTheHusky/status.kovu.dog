@@ -59,7 +59,6 @@ $offset = 0;
 $unique = array();
 $sequentialErrors = 0;
 $totalErrors = 0;
-$uniqueIcons = array();
 $totalCheckins = 0;
 
 $loop = 0;
@@ -106,12 +105,11 @@ do {
             $icon = str_replace('/', '-', $icon);
             $icon = rtrim($icon, '-');
             $icon = rtrim($icon, '_');
+            if (!file_exists('places/' . $icon . '.png')) {
+            file_put_contents('places/' . $icon . '.png', file_get_contents($item->venue->categories[0]->icon->prefix . '512' . $item->venue->categories[0]->icon->suffix));
+        }
         } else {
             $icon = 'default';
-        }
-        if (count($item->venue->categories) > 0 && !in_array($item->venue->categories[0]->icon, $uniqueIcons) && !file_exists('places/' . $icon . '.png')) {
-            file_put_contents('places/' . $icon . '.png', file_get_contents($item->venue->categories[0]->icon->prefix . '512' . $item->venue->categories[0]->icon->suffix));
-            $uniqueIcons[] = $item->venue->categories[0]->icon;
         }
         if (!isset($item->venue->location->formattedAddress)) {
             $item->venue->location->formattedAddress = '';
@@ -165,5 +163,4 @@ $bounds = array(
 );
 
 file_put_contents('places.geojson', json_encode($geojson));
-file_put_contents('places-icons.json', json_encode($uniqueIcons));
 file_put_contents('places.js', 'var bounds = ' . json_encode($bounds) . ';');
