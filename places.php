@@ -18,7 +18,8 @@ require __DIR__ . '/configuration.php';
  * @param int $total The total number of items.
  * @param int $width The width of the progress bar in characters.
  */
-function progressBar($done, $total, $width = 50) {
+function progressBar($done, $total, $width = 50)
+{
     if ($total == 0) {
         return; // Avoid division by zero
     }
@@ -105,9 +106,26 @@ do {
             $icon = str_replace('/', '-', $icon);
             $icon = rtrim($icon, '-');
             $icon = rtrim($icon, '_');
-            if (!file_exists('places/' . $icon . '.png')) {
-            file_put_contents('places/' . $icon . '.png', file_get_contents($item->venue->categories[0]->icon->prefix . '512' . $item->venue->categories[0]->icon->suffix));
-        }
+            if (!file_exists('places/' . $icon . '.webp')) {
+                // file_put_contents('places/' . $icon . '.png', file_get_contents($item->venue->categories[0]->icon->prefix . '512' . $item->venue->categories[0]->icon->suffix));
+                $pngData = file_get_contents($item->venue->categories[0]->icon->prefix . '512' . $item->venue->categories[0]->icon->suffix);
+
+                // Create an image resource from the PNG data
+                $image = imagecreatefromstring($pngData);
+
+                if ($image !== false) {
+                    // Preserve transparency when saving
+                    imagepalettetotruecolor($image);
+                    imagealphablending($image, true);
+                    imagesavealpha($image, true);
+
+                    // Save the image as a WebP file instead of PNG
+                    imagewebp($image, 'places/' . $icon . '.webp');
+
+                    // Free up memory
+                    imagedestroy($image);
+                }
+            }
         } else {
             $icon = 'default';
         }
@@ -146,7 +164,6 @@ do {
 
     $offset += 250;
     $loop++;
-
 } while (count($res->response->checkins->items) > 0);
 
 echo PHP_EOL; // Add a newline after the progress bar is complete
@@ -156,7 +173,8 @@ $bounds = array(
     array(
         $minlng - ($maxlng - $minlng) * 0.05,
         $minlat - ($maxlat - $minlat) * 0.05
-    ), array(
+    ),
+    array(
         $maxlng + ($maxlng - $minlng) * 0.05,
         $maxlat + ($maxlat - $minlat) * 0.05
     )
