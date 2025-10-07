@@ -62,6 +62,11 @@ $sequentialErrors = 0;
 $totalErrors = 0;
 $totalCheckins = 0;
 
+$baseMarker = imagecreatefrompng('marker.png');
+imagepalettetotruecolor($baseMarker);
+imagealphablending($baseMarker, true);
+imagesavealpha($baseMarker, true);
+
 $loop = 0;
 echo "Fetching check-in data..." . PHP_EOL;
 
@@ -106,7 +111,7 @@ do {
             $icon = str_replace('/', '-', $icon);
             $icon = rtrim($icon, '-');
             $icon = rtrim($icon, '_');
-            if (!file_exists('places/' . $icon . '.webp')) {
+            if (!file_exists('markers/' . $icon . '.png')) {
                 // file_put_contents('places/' . $icon . '.png', file_get_contents($item->venue->categories[0]->icon->prefix . '512' . $item->venue->categories[0]->icon->suffix));
                 $pngData = file_get_contents($item->venue->categories[0]->icon->prefix . '512' . $item->venue->categories[0]->icon->suffix);
 
@@ -114,16 +119,32 @@ do {
                 $image = imagecreatefromstring($pngData);
 
                 if ($image !== false) {
-                    // Preserve transparency when saving
+                    $canvas = imagecreatetruecolor(imagesx($baseMarker), imagesy($baseMarker));
+
+                    imagealphablending($canvas, false);
+                    imagesavealpha($canvas, true);
+                    $transparent = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
+                    imagefill($canvas, 0, 0, $transparent);
+                    imagealphablending($canvas, true);
+
+                    imagecopy($canvas, $baseMarker, 0, 0, 0, 0, imagesx($baseMarker), imagesy($baseMarker));
+
                     imagepalettetotruecolor($image);
                     imagealphablending($image, true);
                     imagesavealpha($image, true);
 
-                    // Save the image as a WebP file instead of PNG
-                    imagewebp($image, 'places/' . $icon . '.webp');
+                    $canvasSize = imagesx($canvas);
+                    $iconSize = intval($canvasSize * 0.8); // Make the icon ~80% of the total marker size
+                    $destX = intval(($canvasSize - $iconSize) / 2);
+                    $destY = intval(($canvasSize - $iconSize) / 2);
+
+                    imagecopyresampled($canvas, $image, $destX, $destY, 0, 0, $iconSize, $iconSize, imagesx($image), imagesy($image));
+
+                    imagepng($canvas, 'markers/' . $icon . '.png');
 
                     // Free up memory
                     imagedestroy($image);
+                    imagedestroy($canvas);
                 }
             }
         } else {
@@ -167,6 +188,17 @@ do {
 } while (count($res->response->checkins->items) > 0);
 
 echo PHP_EOL; // Add a newline after the progress bar is complete
+
+
+echo "Generating map icon sprite from composited images..." . PHP_EOL;
+
+// Use npx to run the locally installed spritezero-cli
+// Point it to our directory of freshly made composite markers
+shell_exec('node markers.js');
+
+echo "Sprite generated successfully (sprite.png, sprite.json)." . PHP_EOL;
+
+
 echo "Processing complete. Saving files..." . PHP_EOL;
 
 $bounds = array(
