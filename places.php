@@ -155,30 +155,20 @@ do {
     $loop++;
 } while (count($res->response->checkins->items) > 0);
 
-echo PHP_EOL; // Add a newline after the progress bar is complete
-
-
-// echo "Generating map icon sprite from composited images..." . PHP_EOL;
-
-// Use npx to run the locally installed spritezero-cli
-// Point it to our directory of freshly made composite markers
-// shell_exec('node markers.js');
-
-// echo "Sprite generated successfully (sprite.png, sprite.json)." . PHP_EOL;
-
+echo PHP_EOL;
 
 echo "Processing complete. Saving files..." . PHP_EOL;
 
-$bounds = array(
-    array(
-        $minlng - ($maxlng - $minlng) * 0.05,
-        $minlat - ($maxlat - $minlat) * 0.05
-    ),
-    array(
-        $maxlng + ($maxlng - $minlng) * 0.05,
-        $maxlat + ($maxlat - $minlat) * 0.05
-    )
-);
+// $bounds = array(
+//     array(
+//         $minlng - ($maxlng - $minlng) * 0.05,
+//         $minlat - ($maxlat - $minlat) * 0.05
+//     ),
+//     array(
+//         $maxlng + ($maxlng - $minlng) * 0.05,
+//         $maxlat + ($maxlat - $minlat) * 0.05
+//     )
+// );
 
 file_put_contents('places.geojson', json_encode($geojson));
-file_put_contents('places.js', 'var bounds = ' . json_encode($bounds) . ';');
+// file_put_contents('places.js', 'var bounds = ' . json_encode($bounds) . ';');
