@@ -42,14 +42,16 @@ if (file_exists("minecraft.json") && filesize("minecraft.json") > 0) {
 }
 
 while (true) {
-    for ($time = time(); $time == time(); usleep(1000));
+    time_sleep_until(time() + 1);
+
     $query = new MinecraftQuery();
     $rcon = new SourceQuery();
     try {
         $rcon->Connect(MINECRAFT_IP, 25575);
         $rcon->SetRconPassword(MINECRAFT_PASSWORD);
         while (true) {
-            for ($time = time(); $time == time(); usleep(1000));
+            time_sleep_until(time() + 1);
+
             while (count($json->Tickrate) >= 60) {
                 array_shift($json->Tickrate);
             }
