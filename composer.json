@@ -1,0 +1,6 @@
+{
+    "require": {
+        "xpaw/php-source-query-class": "^5.0",
+        "xpaw/php-minecraft-query": "^5.0"
+    }
+}
