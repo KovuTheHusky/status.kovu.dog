@@ -4,8 +4,6 @@
     "@ghuser/github-contribs": "^2.2.4",
     "@mapbox/spritezero-cli": "^2.1.0",
     "@popperjs/core": "^2.11.8",
-    "PHP-Minecraft-Query": "github:xPaw/PHP-Minecraft-Query",
-    "PHP-Source-Query": "github:xPaw/PHP-Source-Query",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "chart.js": "^4.5.1",
