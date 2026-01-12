@@ -151,12 +151,9 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/composer,node
 
-configuration.php
-markers/*
-places.js
-sprite.png
 *.geojson
-# *.js
-*.json
 *.log
 *.txt
+configuration.php
+minecraft.json
+terraria.json
