@@ -9,7 +9,7 @@
     "chart.js": "^4.5.1",
     "clipboard": "^2.0.11",
     "glob": "^13.0.0",
-    "jquery": "^3.7.1",
+    "jquery": "^4.0.0",
     "mapnik": "^4.5.9",
     "masonry-layout": "^4.2.2",
     "spritesmith": "^3.5.1"
