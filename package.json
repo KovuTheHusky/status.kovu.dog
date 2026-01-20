@@ -13,5 +13,9 @@
     "mapnik": "^4.5.9",
     "masonry-layout": "^4.2.2",
     "spritesmith": "^3.5.1"
+  },
+  "devDependencies": {
+    "@prettier/plugin-php": "^0.24.0",
+    "prettier": "^3.7.4"
   }
 }
