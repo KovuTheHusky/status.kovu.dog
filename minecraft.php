@@ -47,7 +47,7 @@ while (true) {
     $query = new MinecraftQuery();
     $rcon = new SourceQuery();
     try {
-        $rcon->Connect(MINECRAFT_IP, 25575);
+        $rcon->Connect(MINECRAFT_IP, 25575, 1);
         $rcon->SetRconPassword(MINECRAFT_PASSWORD);
         while (true) {
             time_sleep_until(time() + 1);
@@ -65,76 +65,47 @@ while (true) {
             $day = explode(" ", $rcon->Rcon("time query day"))[3] + 1;
             $time = explode(" ", $rcon->Rcon("time query daytime"))[3];
             if ($time >= 18000) {
-                ++$day;
+                $day++;
             }
             $json->Day = (int) $day;
             $json->Time = (int) $time;
-            $raining =
-                explode(
-                    " ",
-                    $rcon->Rcon(
-                        'execute if predicate [{"condition":"minecraft:weather_check","raining":true}]',
-                    ),
-                )[1] == "passed";
-            $thundering =
-                explode(
-                    " ",
-                    $rcon->Rcon(
-                        'execute if predicate [{"condition":"minecraft:weather_check","thundering":true}]',
-                    ),
-                )[1] == "passed";
-            if ($thundering) {
-                $weather = "thunder";
-            } elseif ($raining) {
-                $weather = "rain";
-            } else {
-                $weather = "clear";
-            }
-            $json->Weather = $weather;
-            $moonIndex = $day % 8;
-            switch ($moonIndex) {
-                case 0:
-                    $moonPhase = "full_moon";
-                    break;
-                case 1:
-                    $moonPhase = "waning_gibbous";
-                    break;
-                case 2:
-                    $moonPhase = "last_quarter";
-                    break;
-                case 3:
-                    $moonPhase = "waning_crescent";
-                    break;
-                case 4:
-                    $moonPhase = "new_moon";
-                    break;
-                case 5:
-                    $moonPhase = "waxing_crescent";
-                    break;
-                case 6:
-                    $moonPhase = "first_quarter";
-                    break;
-                case 7:
-                    $moonPhase = "waxing_gibbous";
-                    break;
-            }
-            $json->Moon = $moonPhase;
-            $lm = explode(PHP_EOL, $rcon->Rcon("lm"));
-            $json->Tickrate[] = (float) explode(" ", $lm[0])[2];
-            $memory = explode(" ", $lm[1])[3];
-            $memory = (float) substr($memory, 1, strlen($memory) - 3);
-            $json->Memory[] = $memory;
-            $mspt = explode(
-                "/",
-                explode(
-                    " ",
-                    preg_replace(
-                        '/\xA7[0-9A-FK-OR]/i',
-                        "",
-                        explode(PHP_EOL, $rcon->Rcon("mspt"))[1],
-                    ),
-                )[2],
+            $rainingRaw = $rcon->Rcon(
+                'execute if predicate [{"condition":"minecraft:weather_check","raining":true}]',
             );
+            $raining = strpos($rainingRaw, "passed") !== false;
+
+            $thunderRaw = $rcon->Rcon(
+                'execute if predicate [{"condition":"minecraft:weather_check","thundering":true}]',
+            );
+            $thundering = strpos($thunderRaw, "passed") !== false;
+
+            $json->Weather = $thundering
+                ? "thunder"
+                : ($raining
+                    ? "rain"
+                    : "clear");
+
+            $moonPhases = [
+                "full_moon",
+                "waning_gibbous",
+                "last_quarter",
+                "waning_crescent",
+                "new_moon",
+                "waxing_crescent",
+                "first_quarter",
+                "waxing_gibbous",
+            ];
+            $json->Moon = $moonPhases[$day % 8];
+            // $lm = explode(PHP_EOL, $rcon->Rcon("lm"));
+            // $json->Tickrate[] = (float) explode(" ", $lm[0])[2];
+            // $memory = explode(" ", $lm[1])[3];
+            // $json->Memory[] = (float) substr($memory, 1, strlen($memory) - 3);
+            $msptRaw = preg_replace(
+                '/\xA7[0-9A-FK-OR]/i',
+                "",
+                explode(PHP_EOL, $rcon->Rcon("mspt"))[1],
+            );
+            $mspt = explode("/", explode(" ", $msptRaw)[2]);
             $json->Ticktime = new stdClass();
             $json->Ticktime->Average = (float) preg_replace(
                 "/[^0-9.]/",
@@ -159,10 +130,5 @@ while (true) {
             unlink("minecraft.txt");
         }
         file_put_contents("minecraft.json", "", LOCK_EX);
-        // file_put_contents(
-        //     "minecraft.log",
-        //     "[" . date("d-M-y H:i:s T") . "] " . $e . PHP_EOL,
-        //     FILE_APPEND | LOCK_EX,
-        // );
     }
 }
