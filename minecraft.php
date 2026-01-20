@@ -38,12 +38,9 @@ if (file_exists("minecraft.json") && filesize("minecraft.json") > 0) {
     $json->Info = new stdClass();
     $json->Players = [];
     $json->Tickrate = array_fill(0, 60, 0);
-    $json->Memory = array_fill(0, 60, 0);
 }
 
 while (true) {
-    time_sleep_until(time() + 1);
-
     $query = new MinecraftQuery();
     $rcon = new SourceQuery();
     try {
@@ -54,9 +51,6 @@ while (true) {
 
             while (count($json->Tickrate) >= 60) {
                 array_shift($json->Tickrate);
-            }
-            while (count($json->Memory) >= 60) {
-                array_shift($json->Memory);
             }
             $query->Connect(MINECRAFT_IP, 25565, 1);
             $json->Info = $query->GetInfo();
@@ -96,10 +90,7 @@ while (true) {
                 "waxing_gibbous",
             ];
             $json->Moon = $moonPhases[$day % 8];
-            // $lm = explode(PHP_EOL, $rcon->Rcon("lm"));
-            // $json->Tickrate[] = (float) explode(" ", $lm[0])[2];
-            // $memory = explode(" ", $lm[1])[3];
-            // $json->Memory[] = (float) substr($memory, 1, strlen($memory) - 3);
+
             $msptRaw = preg_replace(
                 '/\xA7[0-9A-FK-OR]/i',
                 "",
@@ -122,6 +113,16 @@ while (true) {
                 "",
                 $mspt[2],
             );
+            $tpsRaw = preg_replace(
+                '/\xA7[0-9A-FK-OR]/i',
+                "",
+                $rcon->Rcon("tps"),
+            );
+            $tpsMatch = explode(": ", $tpsRaw);
+            if (isset($tpsMatch[1])) {
+                $tpsValues = explode(", ", $tpsMatch[1]);
+                $json->Tickrate[] = (float) $tpsValues[0];
+            }
             file_put_contents("minecraft.txt", 1, LOCK_EX);
             file_put_contents("minecraft.json", json_encode($json), LOCK_EX);
         }
@@ -130,5 +131,6 @@ while (true) {
             unlink("minecraft.txt");
         }
         file_put_contents("minecraft.json", "", LOCK_EX);
+        sleep(1);
     }
 }
