@@ -159,10 +159,10 @@ while (true) {
             unlink("minecraft.txt");
         }
         file_put_contents("minecraft.json", "", LOCK_EX);
-        file_put_contents(
-            "minecraft.log",
-            "[" . date("d-M-y H:i:s T") . "] " . $e . PHP_EOL,
-            FILE_APPEND | LOCK_EX,
-        );
+        // file_put_contents(
+        //     "minecraft.log",
+        //     "[" . date("d-M-y H:i:s T") . "] " . $e . PHP_EOL,
+        //     FILE_APPEND | LOCK_EX,
+        // );
     }
 }

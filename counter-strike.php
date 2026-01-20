@@ -114,10 +114,10 @@ while (true) {
         }
     } catch (Exception $e) {
         file_put_contents("counter-strike.json", "", LOCK_EX);
-        file_put_contents(
-            "counter-strike.log",
-            "[" . date("d-M-y H:i:s T") . "] " . $e . PHP_EOL,
-            FILE_APPEND | LOCK_EX,
-        );
+        // file_put_contents(
+        //     "counter-strike.log",
+        //     "[" . date("d-M-y H:i:s T") . "] " . $e . PHP_EOL,
+        //     FILE_APPEND | LOCK_EX,
+        // );
     }
 }
