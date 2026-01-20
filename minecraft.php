@@ -119,15 +119,16 @@ while (true) {
                 $mspt[2],
             );
 
-            $tpsRaw = preg_replace(
-                '/\xA7[0-9A-FK-OR]/i',
-                "",
-                $rcon->Rcon("tps"),
-            );
-            $tpsMatch = explode(": ", $tpsRaw);
+            $tpsRaw = $rcon->Rcon("tps");
+            $tpsClean = preg_replace('/\xA7[0-9A-FK-OR]/i', "", $tpsRaw);
+
+            $tpsMatch = explode(": ", $tpsClean);
             if (isset($tpsMatch[1])) {
                 $tpsValues = explode(", ", $tpsMatch[1]);
-                $json->Tickrate[] = (float) $tpsValues[0];
+                $firstValue = preg_replace("/[^0-9.]/", "", $tpsValues[0]);
+                $json->Tickrate[] = (float) $firstValue;
+            } else {
+                $json->Tickrate[] = 20.0;
             }
 
             file_put_contents("minecraft.txt", 1, LOCK_EX);
