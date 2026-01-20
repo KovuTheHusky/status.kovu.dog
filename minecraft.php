@@ -37,7 +37,8 @@ if (file_exists("minecraft.json") && filesize("minecraft.json") > 0) {
     $json = new stdClass();
     $json->Info = new stdClass();
     $json->Players = [];
-    $json->Tickrate = array_fill(0, 60, 0);
+    $json->Tickrate = array_fill(0, 60, 20.0);
+    $json->Ticktime = array_fill(0, 60, 0.0);
 }
 
 while (true) {
@@ -53,6 +54,9 @@ while (true) {
 
             while (count($json->Tickrate) >= 60) {
                 array_shift($json->Tickrate);
+            }
+            while (count($json->Ticktime) >= 60) {
+                array_shift($json->Ticktime);
             }
 
             $query->Connect(MINECRAFT_IP, 25565, 1);
@@ -96,37 +100,32 @@ while (true) {
             ];
             $json->Moon = $moonPhases[$day % 8];
 
-            $msptRaw = preg_replace(
+            $msptOutput = $rcon->Rcon("mspt");
+            $msptLines = explode(PHP_EOL, $msptOutput);
+            $msptTargetLine = isset($msptLines[1])
+                ? $msptLines[1]
+                : $msptLines[0];
+            $msptClean = preg_replace(
                 '/\xA7[0-9A-FK-OR]/i',
                 "",
-                explode(PHP_EOL, $rcon->Rcon("mspt"))[1],
+                $msptTargetLine,
             );
-            $mspt = explode("/", explode(" ", $msptRaw)[2]);
-            $json->Ticktime = new stdClass();
-            $json->Ticktime->Average = (float) preg_replace(
+            $msptClean = str_replace("◴ ", "", $msptClean);
+            $msptGroups = explode(", ", $msptClean);
+            $msptValues = explode("/", $msptGroups[0]);
+            $json->Ticktime[] = (float) preg_replace(
                 "/[^0-9.]/",
                 "",
-                $mspt[0],
-            );
-            $json->Ticktime->Minimum = (float) preg_replace(
-                "/[^0-9.]/",
-                "",
-                $mspt[1],
-            );
-            $json->Ticktime->Maximum = (float) preg_replace(
-                "/[^0-9.]/",
-                "",
-                $mspt[2],
+                $msptValues[0],
             );
 
             $tpsRaw = $rcon->Rcon("tps");
             $tpsClean = preg_replace('/\xA7[0-9A-FK-OR]/i', "", $tpsRaw);
-
             $tpsMatch = explode(": ", $tpsClean);
             if (isset($tpsMatch[1])) {
                 $tpsValues = explode(", ", $tpsMatch[1]);
-                $firstValue = preg_replace("/[^0-9.]/", "", $tpsValues[0]);
-                $json->Tickrate[] = (float) $firstValue;
+                $tps5s = preg_replace("/[^0-9.]/", "", $tpsValues[0]);
+                $json->Tickrate[] = (float) $tps5s;
             } else {
                 $json->Tickrate[] = 20.0;
             }
