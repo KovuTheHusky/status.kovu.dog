@@ -43,19 +43,23 @@ if (file_exists("minecraft.json") && filesize("minecraft.json") > 0) {
 while (true) {
     $query = new MinecraftQuery();
     $rcon = new SourceQuery();
+
     try {
         $rcon->Connect(MINECRAFT_IP, 25575, 1);
         $rcon->SetRconPassword(MINECRAFT_PASSWORD);
+
         while (true) {
             time_sleep_until(time() + 1);
 
             while (count($json->Tickrate) >= 60) {
                 array_shift($json->Tickrate);
             }
+
             $query->Connect(MINECRAFT_IP, 25565, 1);
             $json->Info = $query->GetInfo();
             $players = $query->GetPlayers();
             $json->Players = $players ? $players : [];
+
             $day = explode(" ", $rcon->Rcon("time query day"))[3] + 1;
             $time = explode(" ", $rcon->Rcon("time query daytime"))[3];
             if ($time >= 18000) {
@@ -63,6 +67,7 @@ while (true) {
             }
             $json->Day = (int) $day;
             $json->Time = (int) $time;
+
             $rainingRaw = $rcon->Rcon(
                 'execute if predicate [{"condition":"minecraft:weather_check","raining":true}]',
             );
@@ -113,6 +118,7 @@ while (true) {
                 "",
                 $mspt[2],
             );
+
             $tpsRaw = preg_replace(
                 '/\xA7[0-9A-FK-OR]/i',
                 "",
@@ -123,6 +129,7 @@ while (true) {
                 $tpsValues = explode(", ", $tpsMatch[1]);
                 $json->Tickrate[] = (float) $tpsValues[0];
             }
+
             file_put_contents("minecraft.txt", 1, LOCK_EX);
             file_put_contents("minecraft.json", json_encode($json), LOCK_EX);
         }
@@ -131,6 +138,7 @@ while (true) {
             unlink("minecraft.txt");
         }
         file_put_contents("minecraft.json", "", LOCK_EX);
+
         sleep(1);
     }
 }
