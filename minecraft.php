@@ -64,12 +64,10 @@ while (true) {
             $players = $query->GetPlayers();
             $json->Players = $players ? $players : [];
 
-            $day = explode(" ", $rcon->Rcon("time query day"))[3] + 1;
+            $day = explode(" ", $rcon->Rcon("time query day"))[3];
             $time = explode(" ", $rcon->Rcon("time query daytime"))[3];
-            if ($time >= 18000) {
-                $day++;
-            }
-            $json->Day = (int) $day;
+
+            $json->Day = (int) ($day + 1);
             $json->Time = (int) $time;
 
             $rainingRaw = $rcon->Rcon(
@@ -139,6 +137,6 @@ while (true) {
         }
         file_put_contents("minecraft.json", "", LOCK_EX);
 
-        sleep(1);
+        sleep(5);
     }
 }
