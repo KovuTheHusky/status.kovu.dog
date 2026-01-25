@@ -50,7 +50,7 @@ while (true) {
         $rcon->SetRconPassword(MINECRAFT_PASSWORD);
 
         while (true) {
-            time_sleep_until(time() + 1);
+            time_sleep_until(time() + 5);
 
             while (count($json->Tickrate) >= 60) {
                 array_shift($json->Tickrate);
@@ -127,6 +127,8 @@ while (true) {
             } else {
                 $json->Tickrate[] = 20.0;
             }
+
+            $json->Updated = time();
 
             file_put_contents("minecraft.txt", 1, LOCK_EX);
             file_put_contents("minecraft.json", json_encode($json), LOCK_EX);
