@@ -35,13 +35,12 @@ if (file_exists("counter-strike.json") && filesize("counter-strike.json") > 0) {
 }
 
 while (true) {
-    sleep(1);
     $query = new SourceQuery();
     try {
         $query->Connect(COUNTERSTRIKE_IP, 27015);
         $query->SetRconPassword(COUNTERSTRIKE_PASSWORD);
         while (true) {
-            sleep(1);
+            time_sleep_until(time() + 5);
             $json->Info = $query->GetInfo();
             $map = $json->Info["Map"];
             if (strpos($map, "workshop/") === 0) {
@@ -69,10 +68,18 @@ while (true) {
                 $json->Info["MapImage"] =
                     $ws->response->publishedfiledetails[0]->preview_url;
             } else {
+                $clean_map = str_replace("de_", "", $map);
+
+                if ($clean_map === "dust2") {
+                    $clean_map = "Dust 2";
+                } else {
+                    $clean_map = ucfirst($clean_map);
+                }
+
                 $json->Info["MapImage"] =
-                    "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/" .
-                    $map .
-                    ".png";
+                    "https://raw.githubusercontent.com/thecs2cup-sys/cs2-maps-images/main/" .
+                    $clean_map .
+                    ".webp";
             }
             $status = $query->Rcon("status");
             // CS2 uses [U:1:12345] format in status output
@@ -132,5 +139,6 @@ while (true) {
         //     "[" . date("d-M-y H:i:s T") . "] " . $e . PHP_EOL,
         //     FILE_APPEND | LOCK_EX,
         // );
+        sleep(5);
     }
 }
