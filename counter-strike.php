@@ -35,13 +35,13 @@ if (file_exists("counter-strike.json") && filesize("counter-strike.json") > 0) {
 }
 
 while (true) {
-    for ($time = time(); $time == time(); usleep(1000));
+    sleep(1);
     $query = new SourceQuery();
     try {
         $query->Connect(COUNTERSTRIKE_IP, 27015);
         $query->SetRconPassword(COUNTERSTRIKE_PASSWORD);
         while (true) {
-            for ($time = time(); $time == time(); usleep(1000));
+            sleep(1);
             $json->Info = $query->GetInfo();
             $map = $json->Info["Map"];
             if (strpos($map, "workshop/") === 0) {
@@ -70,39 +70,52 @@ while (true) {
                     $ws->response->publishedfiledetails[0]->preview_url;
             } else {
                 $json->Info["MapImage"] =
-                    "https://raw.githubusercontent.com/SteamDatabase/GameTracking-CSGO/master/csgo/maps/" .
+                    "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/" .
                     $map .
-                    ".jpg";
+                    ".png";
             }
             $status = $query->Rcon("status");
+            // CS2 uses [U:1:12345] format in status output
             preg_match_all(
-                "/STEAM_1:([0-9]+):([0-9]+)/i",
+                "/\[U:1:([0-9]+)\]/i",
                 $status,
                 $players,
                 PREG_SET_ORDER,
             );
-            $arr = [];
-            foreach ($players as $player) {
-                $id = $player[2] * 2 + $player[1] + 76561197960265728;
 
-                $req = json_decode(
-                    file_get_contents(
-                        "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" .
-                            COUNTERSTRIKE_SECRET .
-                            "&steamids=" .
-                            $id,
-                    ),
+            $ids_to_query = [];
+            foreach ($players as $player) {
+                // Collect all IDs first
+                $ids_to_query[] = $player[1] + 76561197960265728;
+            }
+
+            $arr = [];
+
+            // Only call the API if there are actually players on the server
+            if (!empty($ids_to_query)) {
+                $id_string = implode(",", $ids_to_query); // e.g., "765...,765...,765..."
+
+                $raw_response = file_get_contents(
+                    "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" .
+                        COUNTERSTRIKE_SECRET .
+                        "&steamids=" .
+                        $id_string,
                 );
 
-                $avatar = $req->response->players[0]->avatarfull;
-                $name = $req->response->players[0]->personaname;
-                $url = $req->response->players[0]->profileurl;
+                if ($raw_response) {
+                    $req = json_decode($raw_response);
 
-                $arr[$id] = [
-                    "name" => $name,
-                    "avatar" => $avatar,
-                    "url" => $url,
-                ];
+                    // Loop through the API response, not the regex matches
+                    if (isset($req->response->players)) {
+                        foreach ($req->response->players as $p_data) {
+                            $arr[$p_data->steamid] = [
+                                "name" => $p_data->personaname,
+                                "avatar" => $p_data->avatarfull,
+                                "url" => $p_data->profileurl,
+                            ];
+                        }
+                    }
+                }
             }
             //preg_match_all('/"(.*)" BOT/i', $status, $bots, PREG_SET_ORDER);
             $json->Players = $arr;
